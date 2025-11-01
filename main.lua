@@ -58,10 +58,24 @@ function create_tab(name)
 	return tab
 end
 
-function add_button(tab, name, bind)
+
+function add_button(tab, name, bind, func)
+	local State = false
+	local Binding = false
+	local Bind = nil
+	
 	local function corner_item(item, corner)
 		local c = Instance.new("UICorner", item)
 		c.CornerRadius = corner
+	end
+	
+	local function animate(button, state)
+		local fill = button.Checked
+		local transparency = state and 0.3 or 1
+
+		local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+		local tween = TweenService:Create(fill, tweenInfo, {Transparency = transparency})
+		tween:Play()
 	end
 	
 	local button = Instance.new("Frame", tab.Container)
@@ -85,6 +99,7 @@ function add_button(tab, name, bind)
 	buttonName.BackgroundTransparency = 1
 	buttonName.TextScaled = true
 	buttonName.Name = "Title"
+	buttonName.textColor3 = Color3.fromRGB(255,255,255)
 	
 	local namePadding = Instance.new("UIPadding", buttonName)
 	namePadding.PaddingTop = UDim.new(0, 5)
@@ -97,6 +112,12 @@ function add_button(tab, name, bind)
 	buttonToggle.Size = UDim2.new(0, 30, 0, 30)
 	buttonToggle.Name = "Toggle"
 	buttonToggle.Text = ""
+	
+	buttonToggle.MouseButton1Click:Connect(function()
+		State = not State
+		animate(button.Toggle, State)
+		func(State)
+	end)
 	
 	corner_item(buttonToggle, UDim.new(0, 5))
 	
@@ -116,15 +137,39 @@ function add_button(tab, name, bind)
 	
 	corner_item(toggleChecked, UDim.new(0, 5))
 	
+	local bindButton
 	if bind then
-		local bindButton = buttonToggle:Clone()
+		bindButton = buttonToggle:Clone()
 		bindButton.Parent = button
 		bindButton.Name = "Bind"
 		bindButton.Size = UDim2.new(0,25,0,25)
 		bindButton.Position = UDim2.new(1,-5,0.5,0)
 		bindButton.AnchorPoint = Vector2.new(1,0.5)
 		bindButton.Text = "None"
+		bindButton.TextColor = Color3.fromRGB(255,255,255)
+		
+		local padding = Instance.new("UIPadding", bindButton)
+		padding.PaddingLeft = UDim.new(0,2)
+		padding.PaddingRight = UDim.new(0,2)
+		
+		bindButton.MouseButton1Click:Connect(function()
+			bindButton.Text = "..."
+			Binding = true
+		end)
 	end
+	
+	Uis.InputBegan:Connect(function(Key, gameproc)
+		if gameproc then return end
+		
+		if Binding then
+			bindButton.Text = Key.KeyCode.Name
+			Bind = Key.KeyCode
+		elseif Key.KeyCode == Bind then
+			State = not State
+			animate(button.Toggle, State)
+			func(State)
+		end
+	end)
 	
 	return button
 end
@@ -191,31 +236,90 @@ function create_killaura()
 	return KillAura
 end
 
-function create_speed()
-	local Speed = {}
+function create_movements()
+	local Movements = {}
 
-	Speed.Speed = 5
-	Speed.Enabled = false
-	Speed.SpeedThread = coroutine.create(function()
+	local plr = game.Players.LocalPlayer
+	Movements.Speed = 24
+	Movements.SpeedEnabled = false
+
+	Movements.JumpPower = 45
+	Movements.HighJumpEnabled = false
+
+	Movements.CFrameSpeed = 5
+	Movements.CFrameSpeedEnabled = false
+	Movements.SpeedThread = coroutine.create(function()
 		local old = os.clock()
 		while task.wait() do
-			if not Speed.Enabled then coroutine.yield() end
-			local hrp = game.Players.LocalPlayer.Character.HumanoidRootPart
-			local hum = game.Players.LocalPlayer.Character.Humanoid
-			local amount = (os.clock()-old)*Speed.Speed
+			if not Movements.CFrameSpeedEnabled then coroutine.yield() end
+			local hrp = plr.Character.HumanoidRootPart
+			local hum = plr.Character.Humanoid
+			local amount = (os.clock()-old)*Movements.CFrameSpeed
 			old = os.clock()
 			hrp.CFrame = CFrame.new(hrp.Position+(Vector3.new(hum.MoveDirection.X*amount, hum.MoveDirection.Y*amount, hum.MoveDirection.Z*amount)))
 		end
 	end)
 
-	function Speed:ToggleSpeed(State)
-		Speed.Enabled = State
-		if Speed.Enabled then
-			coroutine.resume(Speed.SpeedThread)
+	function Movements:ToggleCFrameSpeed(State)
+		Movements.CFrameSpeedEnabled = State
+		if Movements.CFrameSpeedEnabled then
+			coroutine.resume(Movements.SpeedThread)
 		end
 	end
 
-	return Speed
+	plr.CharacterAdded:Connect(function(Char)
+		local hum = Char:WaitForChild("Humanoid")
+		local TargetSpeed = Movements.SpeedEnabled and 16+Movements.Speed or 16
+		local TargetPower = Movements.HighJumpEnabled and 45+Movements.JumpPower or 45
+		hum.WalkSpeed = TargetSpeed
+		hum.JumpPower = TargetPower
+		hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+			local TargetSpeed = Movements.SpeedEnabled and 16+Movements.Speed or 16
+			if hum.WalkSpeed ~= TargetSpeed then
+				hum.WalkSpeed = TargetSpeed
+			end
+		end)
+		hum:GetPropertyChangedSignal("JumpPower"):Connect(function()
+			local TargetPower = Movements.HighJumpEnabled and 45+Movements.JumpPower or 45
+			if hum.JumpPower ~= TargetPower then
+				hum.JumpPower = TargetPower
+			end
+		end)
+	end)
+
+	function Movements:ToggleSpeed(State)
+		Movements.SpeedEnabled = State
+		local char = plr.Character
+		if not char then return end
+		local hum = char:FindFirstChild("Humanoid")
+		if not hum then return end
+		local TargetSpeed = State and 16+Movements.Speed or 16
+		hum.WalkSpeed = TargetSpeed
+		hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+			local TargetSpeed = Movements.SpeedEnabled and 16+Movements.Speed or 16
+			if hum.WalkSpeed ~= TargetSpeed then
+				hum.WalkSpeed = TargetSpeed
+			end
+		end)
+	end
+
+	function Movements:ToggleHighJump(State)
+		Movements.HighJumpEnabled = State
+		local char = plr.Character
+		if not char then return end
+		local hum = char:FindFirstChild("Humanoid")
+		if not hum then return end
+		local TargetPower = State and 45+Movements.JumpPower or 45
+		hum.JumpPower = TargetPower
+		hum:GetPropertyChangedSignal("JumpPower"):Connect(function()
+			local TargetPower = State and 45+Movements.JumpPower or 45
+			if hum.JumpPower ~= TargetPower then
+				hum.JumpPower = TargetPower
+			end
+		end)
+	end
+
+	return Movements
 end
 
 function create_clicktp()
@@ -245,7 +349,7 @@ function create_clicktp()
 end
 
 -- load modules
-local Speed = create_speed()
+local Movements = create_movements()
 local KillAura = create_killaura()
 local ClickTP = create_clicktp()
 
@@ -257,28 +361,8 @@ Uis.InputBegan:Connect(function(Key, gameproc)
 	end
 end)
 
-
-function init_button(button, func)
-	local function animate(button, state)
-		local fill = button.Checked
-		local transparency = state and 0.3 or 1
-
-		local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
-		local tween = TweenService:Create(fill, tweenInfo, {Transparency = transparency})
-		tween:Play()
-	end
-
-	local State = false
-	button.Toggle.MouseButton1Click:Connect(function()
-		State = not State
-		animate(button.Toggle, State)
-		func(State)
-	end)
-end
-
 local CombatContainer = create_tab("Combat")
-local KillAuraFrame = add_button(CombatContainer, "Killaura", true)
-init_button(KillAuraFrame, function(State)
+local KillAuraFrame = add_button(CombatContainer, "Killaura", true, function(State)
 	if State then
 		KillAura:Enable()
 	else
@@ -287,18 +371,21 @@ init_button(KillAuraFrame, function(State)
 end)
 
 local MovementsContainer = create_tab("Movements")
-local SpeedFrame = add_button(MovementsContainer, "Speed", false)
-init_button(SpeedFrame, function(State)
-	Speed:ToggleSpeed(State)
+local SpeedFrame = add_button(MovementsContainer, "CFrameSpeed", false, function(State)
+	Movements:ToggleCFrameSpeed(State)
 end)
-local ClickTPFrame = add_button(MovementsContainer, "ClickTP", false)
-init_button(ClickTPFrame, function(State)
+local ClickTPFrame = add_button(MovementsContainer, "ClickTP", false, function(State)
 	ClickTP:Toggle(State)
+end)
+local SpeedFrame = add_button(MovementsContainer, "Speed", false, function(State)
+	Movements:ToggleSpeed(State)
+end)
+local HighJumpFrame = add_button(MovementsContainer, "HighJump", false, function(State)
+	Movements:ToggleHighJump(State)
 end)
 
 local VisualContainer = create_tab("Visuals")
-local ESPFrame = add_button(VisualContainer, "ESP", false)
-init_button(ESPFrame, function(State)
+local ESPFrame = add_button(VisualContainer, "ESP", false, function(State)
 	
 end)
 
