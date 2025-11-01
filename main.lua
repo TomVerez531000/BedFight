@@ -117,7 +117,13 @@ function add_button(tab, name, bind)
 	corner_item(toggleChecked, UDim.new(0, 5))
 	
 	if bind then
-		
+		local bindButton = buttonToggle:Clone()
+		bindButton.Parent = button
+		bindButton.Name = "Bind"
+		bindButton.Size = UDim2.new(0,25,0,25)
+		bindButton.Position = UDim2.new(1,-5,0.5,0)
+		bindButton.AnchorPoint = Vector2.new(1,0.5)
+		bindButton.Text = "None"
 	end
 	
 	return button
@@ -224,7 +230,7 @@ function create_clicktp()
 	ClickTP.ClickConnection = mouse.Button1Down:Connect(function()
 		if not ClickTP.Enabled then return end
 		if not Uis:IsKeyDown(ClickTP.SecondKey) then return end
-		local pos = mouse.Hit.Position
+		local pos = mouse.Hit
 		local char = plr.Character or plr.CharacterAdded:Wait()
 		local Hrp = char:WaitForChild("HumanoidRootPart")
 
@@ -293,6 +299,6 @@ end)
 local VisualContainer = create_tab("Visuals")
 local ESPFrame = add_button(VisualContainer, "ESP", false)
 init_button(ESPFrame, function(State)
-
+	
 end)
 
