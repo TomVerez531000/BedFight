@@ -332,11 +332,11 @@ function create_clicktp()
 	local Uis = game:GetService("UserInputService")
 
 	ClickTP.Enabled = false
-	ClickTP.SecondKey = Enum.KeyCode.LeftControl
+	ClickTP.SecondKey = Enum.KeyCode.LeftAlt
 	ClickTP.ClickConnection = mouse.Button1Down:Connect(function()
 		if not ClickTP.Enabled then return end
 		if not Uis:IsKeyDown(ClickTP.SecondKey) then return end
-		local pos = mouse.Hit
+		local pos = mouse.Hit.Position
 		local char = plr.Character or plr.CharacterAdded:Wait()
 		local Hrp = char:WaitForChild("HumanoidRootPart")
 
@@ -358,7 +358,7 @@ local ClickTP = create_clicktp()
 -- code
 Uis.InputBegan:Connect(function(Key, gameproc)
 	if gameproc then return end
-	if Key.KeyCode == Enum.KeyCode.LeftAlt then
+	if Key.KeyCode == Enum.KeyCode.Insert then
 		Gui.Enabled = not Gui.Enabled
 	end
 end)
