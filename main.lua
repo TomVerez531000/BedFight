@@ -358,7 +358,7 @@ local ClickTP = create_clicktp()
 -- code
 Uis.InputBegan:Connect(function(Key, gameproc)
 	if gameproc then return end
-	if Key.KeyCode == Enum.KeyCode.Insert then
+	if Key.KeyCode == Enum.KeyCode.F then
 		Gui.Enabled = not Gui.Enabled
 	end
 end)
@@ -390,4 +390,3 @@ local VisualContainer = create_tab("Visuals")
 local ESPFrame = add_button(VisualContainer, "ESP", false, function(State)
 	
 end)
-
