@@ -336,7 +336,7 @@ function create_clicktp()
 	ClickTP.ClickConnection = mouse.Button1Down:Connect(function()
 		if not ClickTP.Enabled then return end
 		if not Uis:IsKeyDown(ClickTP.SecondKey) then return end
-		local pos = mouse.Hit.Position
+		local pos = mouse.Hit
 		local char = plr.Character or plr.CharacterAdded:Wait()
 		local Hrp = char:WaitForChild("HumanoidRootPart")
 
