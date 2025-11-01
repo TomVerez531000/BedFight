@@ -99,7 +99,7 @@ function add_button(tab, name, bind, func)
 	buttonName.BackgroundTransparency = 1
 	buttonName.TextScaled = true
 	buttonName.Name = "Title"
-	buttonName.textColor3 = Color3.fromRGB(255,255,255)
+	buttonName.TextColor3 = Color3.fromRGB(255,255,255)
 	
 	local namePadding = Instance.new("UIPadding", buttonName)
 	namePadding.PaddingTop = UDim.new(0, 5)
