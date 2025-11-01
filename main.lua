@@ -394,3 +394,26 @@ local VisualContainer = create_tab("Visuals")
 local ESPFrame = add_button(VisualContainer, "ESP", false, function(State)
 	
 end)
+
+
+-- chat commands
+local commands = {
+	["/e setspeed"] = function(speed)
+		Movements.Speed = tonumber(speed)
+	end,
+	["/e setcframespeed"] = function(speed)
+		Movements.CFrameSpeed = tonumber(speed)
+	end,
+	["/e setjumppower"] = function(jumppower)
+		Movements.JumpPower = tonumber(jumppower)
+	end,
+}
+
+game.Players.LocalPlayer.Chatted:Connect(function(msg)
+	local args = msg:split(" ")
+	for command,func in pairs(commands) do
+		if msg:sub(1,#command) == command then
+			func(args[3])
+		end
+	end
+end)
