@@ -51,6 +51,7 @@ function create_tab(name)
 	local ContainerListLayout = Instance.new("UIListLayout", Container)
 	ContainerListLayout.FillDirection = Enum.FillDirection.Vertical
 	ContainerListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	ContainerListLayout.Padding = UDim.new(0,8)
 	
 	local ContainerPadding = Instance.new("UIPadding", Container)
 	ContainerPadding.PaddingTop = UDim.new(0, 10)
@@ -164,6 +165,7 @@ function add_button(tab, name, bind, func)
 		if Binding then
 			bindButton.Text = Key.KeyCode.Name
 			Bind = Key.KeyCode
+			Binding = false
 		elseif Key.KeyCode == Bind then
 			State = not State
 			animate(button.Toggle, State)
