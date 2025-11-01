@@ -146,7 +146,7 @@ function add_button(tab, name, bind, func)
 		bindButton.Position = UDim2.new(1,-5,0.5,0)
 		bindButton.AnchorPoint = Vector2.new(1,0.5)
 		bindButton.Text = "None"
-		bindButton.TextColor = Color3.fromRGB(255,255,255)
+		bindButton.TextColor3 = Color3.fromRGB(255,255,255)
 		
 		local padding = Instance.new("UIPadding", bindButton)
 		padding.PaddingLeft = UDim.new(0,2)
