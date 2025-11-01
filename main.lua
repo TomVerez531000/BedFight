@@ -254,8 +254,12 @@ function create_movements()
 		local old = os.clock()
 		while task.wait() do
 			if not Movements.CFrameSpeedEnabled then coroutine.yield() end
-			local hrp = plr.Character.HumanoidRootPart
-			local hum = plr.Character.Humanoid
+			local char = plr.Character
+			if not char then continue end
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if not hrp then continue end
+			local hum = char:FindFirstChild("Humanoid")
+			if not hum then continue end
 			local amount = (os.clock()-old)*Movements.CFrameSpeed
 			old = os.clock()
 			hrp.CFrame = CFrame.new(hrp.Position+(Vector3.new(hum.MoveDirection.X*amount, hum.MoveDirection.Y*amount, hum.MoveDirection.Z*amount)))
