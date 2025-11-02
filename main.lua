@@ -12,22 +12,51 @@ Gui.Enabled = true
 -- main
 local tab_index = 0
 function create_tab(name)
+	local dragging = false
+	local function connect_drag(TopFrame: TextButton)
+		TopFrame.MouseButton1Down:Connect(function()
+			local start_pos = TopFrame.AbsolutePosition
+			local start_mouse_pos = Uis:GetMouseLocation()
+			
+			dragging = true
+			local connection
+			connection = Uis.InputEnded:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then
+					dragging = false
+					connection:Disconnect()
+				end
+			end)
+			
+			local connec
+			connec = game.Players.LocalPlayer:GetMouse().Move:Connect(function()
+				if not dragging then connec:Disconnect() return end
+				local mouse_pos = Uis:GetMouseLocation()
+				local delta = mouse_pos - start_mouse_pos
+				local new_pos = start_pos + delta
+				
+				local tab = TopFrame.Parent
+				tab.Position = UDim2.new(0, new_pos.X, 0, new_pos.Y)
+			end)
+		end)
+	end
+	
 	local tab = Instance.new("CanvasGroup", Gui)
 	tab.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	tab.BackgroundTransparency = 0.5
 	tab.Size = UDim2.new(0.21, 0,0.5, 0)
-	tab.Position = UDim2.new(0.1+0.25*tab_index, 0, 0.1, 0)
+	tab.Position = UDim2.new(0.05+0.25*tab_index, 0, 0.1, 0)
 	tab.Name = name
 	tab_index += 1
 	
 	local corner = Instance.new("UICorner", tab)
 	corner.CornerRadius = UDim.new(0, 8)
 	
-	local Top = Instance.new("Frame", tab)
+	local Top = Instance.new("TextButton", tab)
 	Top.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	Top.BackgroundTransparency = 0.5
 	Top.Size = UDim2.new(1, 0,0.11, 0)
 	Top.Name = "Top"
+	Top.Text = ""
 	
 	local TopPadding = Instance.new("UIPadding", Top)
 	TopPadding.PaddingTop = UDim.new(0,5)
@@ -55,6 +84,8 @@ function create_tab(name)
 	
 	local ContainerPadding = Instance.new("UIPadding", Container)
 	ContainerPadding.PaddingTop = UDim.new(0, 10)
+	
+	connect_drag(Top)
 	
 	return tab
 end
