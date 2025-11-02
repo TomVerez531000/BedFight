@@ -356,19 +356,21 @@ function create_movements()
 		end
 	end
 
+	local WalkSpeedConnec
+	local JumpPowerConnec
 	plr.CharacterAdded:Connect(function(Char)
 		local hum = Char:WaitForChild("Humanoid")
 		local TargetSpeed = Movements.SpeedEnabled and 16+Movements.Speed or 16
 		local TargetPower = Movements.HighJumpEnabled and 45+Movements.JumpPower or 45
 		hum.WalkSpeed = TargetSpeed
 		hum.JumpPower = TargetPower
-		hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+		WalkSpeedConnec = hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
 			local TargetSpeed = Movements.SpeedEnabled and 16+Movements.Speed or 16
 			if hum.WalkSpeed ~= TargetSpeed then
 				hum.WalkSpeed = TargetSpeed
 			end
 		end)
-		hum:GetPropertyChangedSignal("JumpPower"):Connect(function()
+		JumpPowerConnec = hum:GetPropertyChangedSignal("JumpPower"):Connect(function()
 			local TargetPower = Movements.HighJumpEnabled and 45+Movements.JumpPower or 45
 			if hum.JumpPower ~= TargetPower then
 				hum.JumpPower = TargetPower
@@ -384,12 +386,14 @@ function create_movements()
 		if not hum then return end
 		local TargetSpeed = State and 16+Movements.Speed or 16
 		hum.WalkSpeed = TargetSpeed
-		hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-			local TargetSpeed = Movements.SpeedEnabled and 16+Movements.Speed or 16
-			if hum.WalkSpeed ~= TargetSpeed then
-				hum.WalkSpeed = TargetSpeed
-			end
-		end)
+		if not WalkSpeedConnec then
+			WalkSpeedConnec = hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+				local TargetSpeed = Movements.SpeedEnabled and 16+Movements.Speed or 16
+				if hum.WalkSpeed ~= TargetSpeed then
+					hum.WalkSpeed = TargetSpeed
+				end
+			end)
+		end
 	end
 
 	function Movements:ToggleHighJump(State)
@@ -400,12 +404,14 @@ function create_movements()
 		if not hum then return end
 		local TargetPower = State and 45+Movements.JumpPower or 45
 		hum.JumpPower = TargetPower
-		hum:GetPropertyChangedSignal("JumpPower"):Connect(function()
-			local TargetPower = State and 45+Movements.JumpPower or 45
-			if hum.JumpPower ~= TargetPower then
-				hum.JumpPower = TargetPower
-			end
-		end)
+		if not JumpPowerConnec then
+			JumpPowerConnec = hum:GetPropertyChangedSignal("JumpPower"):Connect(function()
+				local TargetPower = State and 45+Movements.JumpPower or 45
+				if hum.JumpPower ~= TargetPower then
+					hum.JumpPower = TargetPower
+				end
+			end)
+		end
 	end
 
 	return Movements
