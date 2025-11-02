@@ -140,20 +140,16 @@ function add_button(tab, name, bind, func)
 	if not Settings[tab.Name][name] then
 		Settings[tab.Name][name] = {
 			["Bind"] = false,
+			["Enabled"] = false
 		}
 	end
 	
-	local State = false
+	local State = Settings[tab.Name][name]["Enabled"]
 	local Binding = false
 	local Bind = nil
 	
 	if Settings[tab.Name][name]["Bind"] then
 		Bind = Enum.KeyCode[Settings[tab.Name][name]["Bind"]]
-	end
-	
-	local function corner_item(item, corner)
-		local c = Instance.new("UICorner", item)
-		c.CornerRadius = corner
 	end
 	
 	local function animate(button, state)
@@ -165,11 +161,23 @@ function add_button(tab, name, bind, func)
 		tween:Play()
 	end
 	
+	local function corner_item(item, corner)
+		local c = Instance.new("UICorner", item)
+		c.CornerRadius = corner
+	end
+	
 	local button = Instance.new("Frame", tab.Container)
 	button.BackgroundColor3 = Color3.fromRGB(214, 214, 214)
 	button.BackgroundTransparency = 0.85
 	button.Size = UDim2.new(0.9, 0, 0, 40)
 	button.Name = name
+	
+	local function toggle(State)
+		Settings[tab.Name][name]["Enabled"] = State
+		animate(button.Toggle, State)
+		func(State)
+	end
+	toggle(State)
 	
 	local buttonStroke = Instance.new("UIStroke", button)
 	buttonStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -202,8 +210,7 @@ function add_button(tab, name, bind, func)
 	
 	buttonToggle.MouseButton1Click:Connect(function()
 		State = not State
-		animate(button.Toggle, State)
-		func(State)
+		toggle(State)
 	end)
 	
 	corner_item(buttonToggle, UDim.new(0, 5))
@@ -255,8 +262,7 @@ function add_button(tab, name, bind, func)
 			Settings[tab.Name][name]["Bind"] = Bind.Name
 		elseif Key.KeyCode == Bind then
 			State = not State
-			animate(button.Toggle, State)
-			func(State)
+			toggle(State)
 		end
 	end)
 	
