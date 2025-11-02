@@ -17,7 +17,6 @@ function create_tab(name)
 		TopFrame.MouseButton1Down:Connect(function()
 			local start_mouse_pos = Uis:GetMouseLocation()
 			local start_frame_pos = TopFrame.Parent.Position
-			local offset = start_mouse_pos - TopFrame.AbsolutePosition
 			
 			dragging = true
 			local connection
@@ -32,7 +31,8 @@ function create_tab(name)
 			connec = game.Players.LocalPlayer:GetMouse().Move:Connect(function()
 				if not dragging then connec:Disconnect() return end
 				local mouse_pos = Uis:GetMouseLocation()
-				local new_pos = start_frame_pos + mouse_pos + offset
+				local delta = mouse_pos - start_mouse_pos
+				local new_pos = start_frame_pos+UDim2.new(0,delta.X,0,delta.Y)
 				
 				local tab = TopFrame.Parent
 				tab.Position = UDim2.new(0, new_pos.X, 0, new_pos.Y)
