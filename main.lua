@@ -1,6 +1,7 @@
 -- services
 local TweenService = game:GetService("TweenService")
 local Uis = game:GetService("UserInputService")
+local httpService = game:GetService("HttpService")
 
 -- variables
 local Gui = Instance.new("ScreenGui", game.CoreGui)
@@ -9,9 +10,19 @@ Gui.ResetOnSpawn = false
 Gui.IgnoreGuiInset = true
 Gui.Enabled = true
 
+local Settings = {}
+-- Auto Load Settings
+if isfile("BedFightVortex.txt") then
+	local data = readfile("BedFightVortex.txt")
+	data = httpService:JSONDecode(data)
+	Settings = data
+end
+
 -- main
 local tab_index = 0
 function create_tab(name)
+	Settings[name] = {}
+	
 	local dragging = false
 	local function connect_drag(TopFrame: TextButton)
 		TopFrame.MouseButton1Down:Connect(function()
@@ -91,11 +102,47 @@ function create_tab(name)
 	return tab
 end
 
+function add_basic_button(tab, name, func)
+	local function corner_item(item, corner)
+		local c = Instance.new("UICorner", item)
+		c.CornerRadius = corner
+	end
+
+	local button = Instance.new("TextButton", tab.Container)
+	button.BackgroundColor3 = Color3.fromRGB(214, 214, 214)
+	button.BackgroundTransparency = 0.85
+	button.Size = UDim2.new(0.9, 0, 0, 40)
+	button.Name = name
+	button.Text = name
+	button.TextScaled = true
+	button.TextColor3 = Color3.fromRGB(255,255,255)
+	corner_item(button, UDim.new(0, 5))
+
+	local buttonStroke = Instance.new("UIStroke", button)
+	buttonStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	buttonStroke.Color = Color3.fromRGB(184, 184, 184)
+	buttonStroke.Thickness = 0.5
+	buttonStroke.Transparency = 0.5
+
+	local namePadding = Instance.new("UIPadding", button)
+	namePadding.PaddingTop = UDim.new(0, 5)
+	namePadding.PaddingBottom = UDim.new(0, 5)
+	
+	button.MouseButton1Click:Connect(func)
+end
 
 function add_button(tab, name, bind, func)
+	Settings[tab.Name][name] = {
+		["Bind"] = false,
+	}
+	
 	local State = false
 	local Binding = false
 	local Bind = nil
+	
+	if Settings[tab.Name] and Settings[tab.Name][name] then
+		Bind = Settings[tab.Name][name]["Bind"]
+	end
 	
 	local function corner_item(item, corner)
 		local c = Instance.new("UICorner", item)
@@ -198,6 +245,7 @@ function add_button(tab, name, bind, func)
 			bindButton.Text = Key.KeyCode.Name
 			Bind = Key.KeyCode
 			Binding = false
+			Settings[tab.Name][name]["Bind"] = Bind
 		elseif Key.KeyCode == Bind then
 			State = not State
 			animate(button.Toggle, State)
@@ -545,7 +593,10 @@ local VisualContainer = create_tab("Visuals")
 local ESPFrame = add_button(VisualContainer, "ESP", false, function(State)
 	
 end)
-
+local SaveSettingsButton = add_basic_button(VisualContainer, "Save Settings", function()
+	local data = httpService:JSONEncode(Settings)
+	writefile("BedFightVortex.txt", data)
+end)
 
 -- chat commands
 local commands = {
