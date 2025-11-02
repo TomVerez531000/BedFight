@@ -144,7 +144,7 @@ function add_button(tab, name, bind, func)
 		}
 	end
 	
-	local State = Settings[tab.Name][name]["Enabled"]
+	local State = Settings[tab.Name][name]["Enabled"] or false
 	local Binding = false
 	local Bind = nil
 	
