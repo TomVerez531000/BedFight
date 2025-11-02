@@ -12,43 +12,11 @@ Gui.Enabled = true
 
 local Settings = {}
 -- Auto Load Settings
-function serialize_settings()
-	local serialized = {}
-	for tab,val in pairs(Settings) do
-		serialized[tab] = {}
-		for button,setting in pairs(val) do
-			local serialized_setting = setting
-			if serialized_setting["Bind"] then
-				serialized_setting["Bind"] = serialized_setting["Bind"].Name
-			else
-				serialized_setting["Bind"] = false
-			end
-			serialized[tab][button] = serialized_setting
-		end
-	end
-	return serialized
-end
-
-function deserialize_settings(data)
-	local deserialized = {}
-	for tab,val in pairs(data) do
-		deserialized[tab] = {}
-		for button,setting in pairs(val) do
-			local deserialized_setting = setting
-			if deserialized_setting["Bind"] then
-				deserialized_setting["Bind"] = Enum.KeyCode[deserialized_setting["Bind"]]
-			end
-			deserialized[tab][button] = deserialized_setting
-		end
-	end
-	return deserialized
-end
-
 if isfile("BedFightVortex.txt") then
 	local data = readfile("BedFightVortex.txt")
 	local dt = {}
 	success,err = pcall(function()
-		dt = deserialize_settings(httpService:JSONDecode(data))
+		dt = httpService:JSONDecode(data)
 	end)
 	Settings = dt
 end
@@ -56,7 +24,9 @@ end
 -- main
 local tab_index = 0
 function create_tab(name)
-	Settings[name] = {}
+	if not Settings[name] then
+		Settings[name] = {}
+	end
 	
 	local dragging = false
 	local function connect_drag(TopFrame: TextButton)
@@ -167,16 +137,18 @@ function add_basic_button(tab, name, func)
 end
 
 function add_button(tab, name, bind, func)
-	Settings[tab.Name][name] = {
-		["Bind"] = false,
-	}
+	if not Settings[tab.Name][name] then
+		Settings[tab.Name][name] = {
+			["Bind"] = false,
+		}
+	end
 	
 	local State = false
 	local Binding = false
 	local Bind = nil
 	
-	if Settings[tab.Name] and Settings[tab.Name][name] then
-		Bind = Settings[tab.Name][name]["Bind"]
+	if Settings[tab.Name][name]["Bind"] then
+		Bind = Enum.KeyCode[Settings[tab.Name][name]["Bind"]]
 	end
 	
 	local function corner_item(item, corner)
@@ -280,7 +252,7 @@ function add_button(tab, name, bind, func)
 			bindButton.Text = Key.KeyCode.Name
 			Bind = Key.KeyCode
 			Binding = false
-			Settings[tab.Name][name]["Bind"] = Bind
+			Settings[tab.Name][name]["Bind"] = Bind.Name
 		elseif Key.KeyCode == Bind then
 			State = not State
 			animate(button.Toggle, State)
@@ -635,7 +607,7 @@ local ESPFrame = add_button(VisualContainer, "ESP", false, function(State)
 	
 end)
 local SaveSettingsButton = add_basic_button(VisualContainer, "Save Settings", function()
-	local data = httpService:JSONEncode(serialize_settings())
+	local data = httpService:JSONEncode(Settings)
 	writefile("BedFightVortex.txt", data)
 end)
 
