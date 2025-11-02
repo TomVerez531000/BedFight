@@ -14,8 +14,11 @@ local Settings = {}
 -- Auto Load Settings
 if isfile("BedFightVortex.txt") then
 	local data = readfile("BedFightVortex.txt")
-	data = httpService:JSONDecode(data)
-	Settings = data
+	local dt = {}
+	success,err = pcall(function()
+		dt = httpService:JSONDecode(data)
+	end)
+	Settings = dt
 end
 
 -- main
