@@ -12,11 +12,41 @@ Gui.Enabled = true
 
 local Settings = {}
 -- Auto Load Settings
+function serialize_settings()
+	local serialized = {}
+	for tab,val in pairs(Settings) do
+		serialized[tab] = {}
+		for button,setting in pairs(val) do
+			local serialized_setting = setting
+			if serialized_setting["Bind"] then
+				serialized_setting["Bind"] = serialized_setting["Bind"].Name
+			end
+			serialized[tab][button] = serialized_setting
+		end
+	end
+	return serialized
+end
+
+function deserialize_settings(data)
+	local deserialized = {}
+	for tab,val in pairs(data) do
+		deserialized[tab] = {}
+		for button,setting in pairs(val) do
+			local deserialized_setting = setting
+			if deserialized_setting["Bind"] then
+				deserialized_setting["Bind"] = Enum.KeyCode[deserialized_setting["Bind"]]
+			end
+			deserialized[tab][button] = deserialized_setting
+		end
+	end
+	return deserialized
+end
+
 if isfile("BedFightVortex.txt") then
 	local data = readfile("BedFightVortex.txt")
 	local dt = {}
 	success,err = pcall(function()
-		dt = httpService:JSONDecode(data)
+		dt = deserialize_settings(httpService:JSONDecode(data))
 	end)
 	Settings = dt
 end
@@ -603,7 +633,7 @@ local ESPFrame = add_button(VisualContainer, "ESP", false, function(State)
 	
 end)
 local SaveSettingsButton = add_basic_button(VisualContainer, "Save Settings", function()
-	local data = httpService:JSONEncode(Settings)
+	local data = httpService:JSONEncode(serialize_settings())
 	writefile("BedFightVortex.txt", data)
 end)
 
