@@ -421,11 +421,54 @@ function create_bedaura()
 	return BedAura
 end
 
+function create_autobridge()
+	local AutoBridge = {}
+
+	function AutoBridge.PlaceBlock(Block, Pos)
+		local args = {
+			Block,
+			13,
+			Pos
+		}
+		game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("PlaceBlock"):FireServer(unpack(args))
+	end
+
+	AutoBridge.Enabled = false
+	AutoBridge.Thread = coroutine.create(function()
+		while task.wait() do
+			if not AutoBridge.Enabled then
+				coroutine.yield()
+			end
+
+			local char = game.Players.LocalPlayer.Character
+			if not char then continue end
+			local playercf = game.Players.LocalPlayer.Character:GetPivot()
+			local playerdirection = playercf.LookVector
+			local Pos1 = playercf.Position+Vector3.new(0,-3,0)+(playerdirection*3)
+			local Pos2 = playercf.Position+Vector3.new(0,-3,0)+(playerdirection*6)
+
+			local Block = game.Players.LocalPlayer.Team.Name.." Wool"
+			AutoBridge.PlaceBlock(Block, Pos1)
+			AutoBridge.PlaceBlock(Block, Pos2)
+		end
+	end)
+
+	function AutoBridge:Toggle(State)
+		AutoBridge.Enabled = State
+		if AutoBridge.Enabled then
+			coroutine.resume(AutoBridge.Thread)
+		end
+	end
+
+	return AutoBridge
+end
+
 -- load modules
 local Movements = create_movements()
 local KillAura = create_killaura()
 local ClickTP = create_clicktp()
 local BedAura = create_bedaura()
+local AutoBridge = create_autobridge()
 
 -- code
 Uis.InputBegan:Connect(function(Key, gameproc)
@@ -443,9 +486,6 @@ local KillAuraFrame = add_button(CombatContainer, "Killaura", true, function(Sta
 		KillAura:Disable()
 	end
 end)
-local BedAuraFrame = add_button(CombatContainer, "Bed Aura", true, function(State)
-	BedAura:Toggle(State)
-end)
 
 local MovementsContainer = create_tab("Movements")
 local SpeedFrame = add_button(MovementsContainer, "CFrameSpeed", false, function(State)
@@ -459,6 +499,14 @@ local SpeedFrame = add_button(MovementsContainer, "Speed", false, function(State
 end)
 local HighJumpFrame = add_button(MovementsContainer, "HighJump", false, function(State)
 	Movements:ToggleHighJump(State)
+end)
+
+local UtilityContainer = create_tab("Utility")
+local BedAuraFrame = add_button(UtilityContainer, "Bed Aura", true, function(State)
+	BedAura:Toggle(State)
+end)
+local AutoBridgeFrame = add_button(UtilityContainer, "Auto Bridge", true, function(State)
+	AutoBridge:Toggle(State)
 end)
 
 local VisualContainer = create_tab("Visuals")
