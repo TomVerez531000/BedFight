@@ -20,6 +20,8 @@ function serialize_settings()
 			local serialized_setting = setting
 			if serialized_setting["Bind"] then
 				serialized_setting["Bind"] = serialized_setting["Bind"].Name
+			else
+				serialized_setting["Bind"] = false
 			end
 			serialized[tab][button] = serialized_setting
 		end
