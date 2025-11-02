@@ -200,19 +200,6 @@ function add_button(tab, name, bind, func)
 	buttonToggle.Size = UDim2.new(0, 30, 0, 30)
 	buttonToggle.Name = "Toggle"
 	buttonToggle.Text = ""
-	
-	local function toggle(State)
-		Settings[tab.Name][name]["Enabled"] = State
-		animate(button.Toggle, State)
-		func(State)
-	end
-	toggle(State)
-	
-	buttonToggle.MouseButton1Click:Connect(function()
-		State = not State
-		toggle(State)
-	end)
-	
 	corner_item(buttonToggle, UDim.new(0, 5))
 	
 	local toggleStroke = Instance.new("UIStroke", buttonToggle)
@@ -230,6 +217,18 @@ function add_button(tab, name, bind, func)
 	toggleChecked.Name = "Checked"
 	
 	corner_item(toggleChecked, UDim.new(0, 5))
+	
+	local function toggle(State)
+		Settings[tab.Name][name]["Enabled"] = State
+		animate(button.Toggle, State)
+		func(State)
+	end
+	toggle(State)
+
+	buttonToggle.MouseButton1Click:Connect(function()
+		State = not State
+		toggle(State)
+	end)
 	
 	local bindButton
 	if bind then
