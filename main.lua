@@ -15,8 +15,9 @@ function create_tab(name)
 	local dragging = false
 	local function connect_drag(TopFrame: TextButton)
 		TopFrame.MouseButton1Down:Connect(function()
-			local start_pos = TopFrame.AbsolutePosition
 			local start_mouse_pos = Uis:GetMouseLocation()
+			local start_frame_pos = TopFrame.Parent.Position
+			local offset = start_mouse_pos - TopFrame.AbsolutePosition
 			
 			dragging = true
 			local connection
@@ -31,8 +32,7 @@ function create_tab(name)
 			connec = game.Players.LocalPlayer:GetMouse().Move:Connect(function()
 				if not dragging then connec:Disconnect() return end
 				local mouse_pos = Uis:GetMouseLocation()
-				local delta = mouse_pos - start_mouse_pos
-				local new_pos = start_pos + delta
+				local new_pos = mouse_pos + offset
 				
 				local tab = TopFrame.Parent
 				tab.Position = UDim2.new(0, new_pos.X, 0, new_pos.Y)
@@ -57,6 +57,7 @@ function create_tab(name)
 	Top.Size = UDim2.new(1, 0,0.11, 0)
 	Top.Name = "Top"
 	Top.Text = ""
+	Top.AutoButtonColor = false
 	
 	local TopPadding = Instance.new("UIPadding", Top)
 	TopPadding.PaddingTop = UDim.new(0,5)
