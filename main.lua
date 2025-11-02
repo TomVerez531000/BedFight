@@ -35,7 +35,7 @@ function create_tab(name)
 				local new_pos = start_frame_pos+UDim2.new(0,delta.X,0,delta.Y)
 				
 				local tab = TopFrame.Parent
-				tab.Position = UDim2.new(0, new_pos.X, 0, new_pos.Y)
+				tab.Position = new_pos
 			end)
 		end)
 	end
