@@ -172,13 +172,6 @@ function add_button(tab, name, bind, func)
 	button.Size = UDim2.new(0.9, 0, 0, 40)
 	button.Name = name
 	
-	local function toggle(State)
-		Settings[tab.Name][name]["Enabled"] = State
-		animate(button.Toggle, State)
-		func(State)
-	end
-	toggle(State)
-	
 	local buttonStroke = Instance.new("UIStroke", button)
 	buttonStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	buttonStroke.Color = Color3.fromRGB(184, 184, 184)
@@ -207,6 +200,13 @@ function add_button(tab, name, bind, func)
 	buttonToggle.Size = UDim2.new(0, 30, 0, 30)
 	buttonToggle.Name = "Toggle"
 	buttonToggle.Text = ""
+	
+	local function toggle(State)
+		Settings[tab.Name][name]["Enabled"] = State
+		animate(button.Toggle, State)
+		func(State)
+	end
+	toggle(State)
 	
 	buttonToggle.MouseButton1Click:Connect(function()
 		State = not State
