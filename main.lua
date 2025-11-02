@@ -354,10 +354,78 @@ function create_clicktp()
 	return ClickTP
 end
 
+function create_bedaura()
+	local BedAura = {}
+
+	BedAura.Enabled = false
+	function BedAura.get_closest_bed()
+		local closest = nil
+		local closestdist = math.huge
+		for _,bed in pairs(workspace.BedsContainer:GetChildren()) do
+			local pos = bed:GetPivot().Position
+			local dist = (pos-game.Players.LocalPlayer.Character:GetPivot().Position).Magnitude
+			if dist < closestdist then
+				closestdist = dist
+				closest = bed
+			end
+		end
+		return closest
+	end
+
+	function BedAura.get_best_owned_pickaxe()
+		local Pickaxes = {"Wooden Pickaxe", "Stone Pickaxe", "Iron Pickaxe", "Diamond Pickaxe"}
+
+		local inventory = game.Players.LocalPlayer:WaitForChild("Inventory")
+		local best = "Wooden Pickaxe"
+		for _,pickaxe in pairs(Pickaxes) do
+			if inventory:FindFirstChild(pickaxe) then
+				best = pickaxe
+			end
+		end
+
+		return best
+	end
+
+	BedAura.Thread = coroutine.create(function()
+		while task.wait() do
+			if not BedAura.Enabled then
+				coroutine.yield()
+			end
+
+			local bed = BedAura.get_closest_bed()
+			if not bed then continue end
+			local dist = (bed:GetPivot().Position-game.Players.LocalPlayer.Character:GetPivot().Position).Magnitude
+			if dist > 20 then continue end
+			local pickaxe = BedAura.get_best_owned_pickaxe()
+
+			local MinePos = bed:GetPivot().Position+Vector3.new(0,bed:GetExtentsSize().Y+0.05,0)
+
+			local args = {
+				"Wooden Pickaxe",
+				bed,
+				bed:GetPivot().Position,
+				MinePos,
+				bed:GetPivot().Position-MinePos
+			}
+			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ItemsRemotes"):WaitForChild("MineBlock"):FireServer(unpack(args))
+		end
+	end)
+
+	function BedAura:Toggle(State)
+		BedAura.Enabled = State
+		if BedAura.Enabled then
+			coroutine.resume(BedAura.Thread)
+		end
+	end
+
+	return BedAura
+end
+
 -- load modules
 local Movements = create_movements()
 local KillAura = create_killaura()
 local ClickTP = create_clicktp()
+local BedAura = create_bedaura()
 
 -- code
 Uis.InputBegan:Connect(function(Key, gameproc)
@@ -374,6 +442,9 @@ local KillAuraFrame = add_button(CombatContainer, "Killaura", true, function(Sta
 	else
 		KillAura:Disable()
 	end
+end)
+local BedAuraFrame = add_button(CombatContainer, "Bed Aura", true, function(State)
+	BedAura:Toggle(State)
 end)
 
 local MovementsContainer = create_tab("Movements")
