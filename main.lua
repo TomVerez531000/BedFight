@@ -32,7 +32,7 @@ function create_tab(name)
 			connec = game.Players.LocalPlayer:GetMouse().Move:Connect(function()
 				if not dragging then connec:Disconnect() return end
 				local mouse_pos = Uis:GetMouseLocation()
-				local new_pos = mouse_pos + offset
+				local new_pos = start_frame_pos + mouse_pos + offset
 				
 				local tab = TopFrame.Parent
 				tab.Position = UDim2.new(0, new_pos.X, 0, new_pos.Y)
