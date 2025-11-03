@@ -339,10 +339,10 @@ function create_movements()
 	local Movements = {}
 
 	local plr = game.Players.LocalPlayer
-	Movements.Speed = 24
+	Movements.Speed = 14
 	Movements.SpeedEnabled = false
 
-	Movements.JumpPower = 45
+	Movements.JumpPower = 25
 	Movements.HighJumpEnabled = false
 
 	Movements.CFrameSpeed = 5
