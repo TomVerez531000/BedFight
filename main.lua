@@ -64,6 +64,10 @@ function create_tab(name)
 	tab.Name = name
 	tab_index += 1
 	
+	if Settings["Position"] then
+		tab.Position = UDim2.new(0,Settings["Position"][1],0,Settings["Position"][2])
+	end
+	
 	local corner = Instance.new("UICorner", tab)
 	corner.CornerRadius = UDim.new(0, 8)
 	
@@ -276,6 +280,7 @@ function create_killaura()
 		local closest = nil
 		local closest_distance = math.huge
 		for _,player in pairs(game.Players:GetPlayers()) do
+			if player == game.Players.LocalPlayer then continue end
 			if game.Players.LocalPlayer.Team ~= game.Teams.Spectators and (player.Team == game.Teams.Spectators or player.Team == game.Players.LocalPlayer.Team) then continue end
 			if player.Character and (player.Character:GetPivot().Position-game.Players.LocalPlayer.Character:GetPivot().Position).Magnitude < closest_distance then
 				closest = player
@@ -612,28 +617,11 @@ local ESPFrame = add_button(VisualContainer, "ESP", false, function(State)
 	
 end)
 local SaveSettingsButton = add_basic_button(VisualContainer, "Save Settings", function()
+	for tab,val in pairs(Settings) do
+		val["Position"] = {Gui[tab].AbsolutePosition.X, Gui[tab].AbsolutePosition.Y}
+	end
 	local data = httpService:JSONEncode(Settings)
 	writefile("BedFightVortex.txt", data)
 end)
 
--- chat commands
-local commands = {
-	["/e setspeed"] = function(speed)
-		Movements.Speed = tonumber(speed)
-	end,
-	["/e setcframespeed"] = function(speed)
-		Movements.CFrameSpeed = tonumber(speed)
-	end,
-	["/e setjumppower"] = function(jumppower)
-		Movements.JumpPower = tonumber(jumppower)
-	end,
-}
 
-game.Players.LocalPlayer.Chatted:Connect(function(msg)
-	local args = msg:split(" ")
-	for command,func in pairs(commands) do
-		if msg:sub(1,#command) == command then
-			func(args[3])
-		end
-	end
-end)
