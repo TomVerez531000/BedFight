@@ -578,6 +578,13 @@ function create_antivoid()
 		if AntiVoid.Connection then
 			AntiVoid.Connection:Disconnect()
 		end
+		local MapName = game.ReplicatedStorage.GameInfo.Map.Value
+		local Map = workspace[MapName]
+		local model = Instance.new("Model", workspace)
+		Map.Parent = model
+		local FallHeight = (model:GetPivot().Y-(model:GetExtentsSize().Y/2))+10
+		Map.Parent = workspace
+		model:Destroy()
 
 		local hum: Humanoid = char:WaitForChild("Humanoid")
 		local old = hum.FloorMaterial
@@ -585,7 +592,7 @@ function create_antivoid()
 			if hum.FloorMaterial == Enum.Material.Air then
 				local pos = char:GetPivot()
 				while task.wait() do
-					if char:GetPivot().Y <= 60 then
+					if char:GetPivot().Y <= FallHeight then
 						char:PivotTo(pos)
 						if hum.FloorMaterial ~= Enum.Material.Air then
 							break
