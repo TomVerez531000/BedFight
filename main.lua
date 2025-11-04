@@ -578,8 +578,7 @@ function create_antivoid()
 		if AntiVoid.Connection then
 			AntiVoid.Connection:Disconnect()
 		end
-		local MapName = game.ReplicatedStorage.GameInfo.Map.Value
-		local Map = workspace[MapName]
+		local Map = game.ReplicatedStorage.GameInfo.Map.Value
 		local model = Instance.new("Model", workspace)
 		Map.Parent = model
 		local FallHeight = (model:GetPivot().Y-(model:GetExtentsSize().Y/2))+10
