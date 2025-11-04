@@ -566,12 +566,63 @@ function create_autobridge()
 	return AutoBridge
 end
 
+function create_antivoid()
+	local AntiVoid = {}
+
+	AntiVoid.Enabled = false
+	AntiVoid.Connection = nil
+
+	local Plr = game.Players.LocalPlayer
+
+	function AntiVoid.connectChar(char)
+		if AntiVoid.Connection then
+			AntiVoid.Connection:Disconnect()
+		end
+
+		local hum: Humanoid = char:WaitForChild("Humanoid")
+		local old = hum.FloorMaterial
+		AntiVoid.Connection = hum:GetPropertyChangedSignal("FloorMaterial"):Connect(function()
+			if hum.FloorMaterial == Enum.Material.Air then
+				local pos = char:GetPivot()
+				while task.wait() do
+					if char:GetPivot().Y <= 60 then
+						char:PivotTo(pos)
+						if hum.FloorMaterial ~= Enum.Material.Air then
+							break
+						end
+					end
+				end
+			end
+		end)
+	end
+
+	Plr.CharacterAdded:Connect(function(char)
+		if AntiVoid.Enabled then
+			AntiVoid.connectChar(char)
+		end
+	end)
+
+	function AntiVoid:Toggle(State)
+		AntiVoid.Enabled = State
+		if AntiVoid.Enabled then
+			AntiVoid.connectChar(Plr.Character or Plr.CharacterAdded:Wait())
+		else
+			if AntiVoid.Connection then
+				AntiVoid.Connection:Disconnect()
+			end
+		end
+	end
+
+	return AntiVoid
+end
+
 -- load modules
 local Movements = create_movements()
 local KillAura = create_killaura()
 local ClickTP = create_clicktp()
 local BedAura = create_bedaura()
 local AutoBridge = create_autobridge()
+local AntiVoid = create_antivoid()
 
 -- code
 Uis.InputBegan:Connect(function(Key, gameproc)
@@ -602,6 +653,9 @@ local SpeedFrame = add_button(MovementsContainer, "Speed", false, function(State
 end)
 local HighJumpFrame = add_button(MovementsContainer, "HighJump", false, function(State)
 	Movements:ToggleHighJump(State)
+end)
+local AntiVoidFrame = add_button(MovementsContainer, "Anti Void", false, function(State)
+	AntiVoid:Toggle(State)
 end)
 
 local UtilityContainer = create_tab("Utility")
